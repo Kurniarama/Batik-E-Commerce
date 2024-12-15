@@ -1,27 +1,34 @@
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
+
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from flask_bcrypt import Bcrypt
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
 
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
+MONGODB_URI = os.environ.get("MONGODB_URI")
+DB_NAME =  os.environ.get("DB_NAME")
+
+client = MongoClient(MONGODB_URI)
+
+db = client[DB_NAME]
+
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
-
-# Tambahkan secret_key untuk session
-app.secret_key = "ramaaaaaaaaaaaaaaaaaaaaaa"  # Anda juga bisa mengganti ini dengan string kustom yang panjang
 
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-
-client = MongoClient("mongodb+srv://kurniaramadhan:ttg3JzFNrL6LJfuq@cluster0.zb9ev.mongodb.net/")
-db = client['ecommerce_batik']
 
 for review in db.reviews.find():
     print(review)
